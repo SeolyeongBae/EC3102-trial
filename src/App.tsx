@@ -40,15 +40,15 @@ function App() {
 
   const [prosecutorLife, setProsecutorLife] = useState<number>(3);
   const [defenseLife, setDefenseLife] = useState<number>(3);
-  const [gameOver, setGameOver] = useState<string | null>(null);
+
   const [displayedText, setDisplayedText] = useState<string>(INITIAL_TEXT);
   const [fullText, setFullText] = useState<string>(INITIAL_TEXT);
 
   useEffect(() => {
     if (prosecutorLife === 0) {
-      setGameOver("증인은 무죄가 되었습니다");
+      alert("증인은 무죄가 되었습니다");
     } else if (defenseLife === 0) {
-      setGameOver("증인은 유죄가 되었습니다");
+      alert("증인은 유죄가 되었습니다");
     }
   }, [prosecutorLife, defenseLife]);
 
@@ -64,6 +64,8 @@ function App() {
           clearInterval(intervalId);
           setTimeout(() => {
             setTurn("변호사");
+            setFullText("");
+            setDisplayedText("안녕하세요, 검사입니다."); //서버에서 받아온 검사의 말
           }, 500);
         }
       }, 100);
@@ -73,53 +75,19 @@ function App() {
   }, [fullText]);
 
   const handleInput = useCallback((input: string) => {
-    setFullText(input);
-    setDisplayedText("");
+    setFullText(input); //서버에서 받아온 변호사의 말
+    setDisplayedText(""); //타이핑 효과를 위해 displaytext는 비움
     setTurn("검사");
   }, []);
 
   const handleLifeChange = (text: string) => {
-    console.log("text", text);
-
     setFullText(text);
     setDisplayedText("");
     setTurn("검사");
   };
 
-  const handleRestart = () => {
-    setTurn("검사");
-    setProsecutorLife(3);
-    setDefenseLife(3);
-    setGameOver(null);
-    setDisplayedText("");
-    setFullText(INITIAL_TEXT);
-  };
-
-  if (gameOver) {
-    return (
-      <div className="App">
-        <Header prosecutorLife={prosecutorLife} defenseLife={defenseLife} />
-        <div className="game-over">
-          {gameOver}
-          <button onClick={handleRestart}>다시하기</button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={"flex flex-col w-full items-center px-10 bg-amber-50 pt-5"}>
-      <Header prosecutorLife={prosecutorLife} defenseLife={defenseLife} />
-      <DialogBox
-        displayedText={displayedText}
-        speaker={turn === "검사" ? "변호사" : "검사"}
-      />
-      <Controls
-        onInput={handleInput}
-        onLifeChange={handleLifeChange}
-        currentTurn={turn}
-      />
-
       <div className={"flex w-full gap-4"}>
         <button className={"py-2 px-8 text-lg hover:bg-[rgba(0,0,0,0.1)]"}>
           <p>재판</p>
@@ -142,7 +110,7 @@ function App() {
           >
             YOU
           </p>
-          <LifeHearts maximum={3} left={3} />
+          <LifeHearts maximum={3} left={defenseLife} />
           <img
             src={Lawyer}
             alt={"Lawyer"}
@@ -158,38 +126,24 @@ function App() {
         </div>
 
         <div className={"flex flex-col items-center"}>
-          <LifeHearts maximum={3} left={3} />
+          <LifeHearts maximum={3} left={prosecutorLife} />
           <img src={Lawyer} alt={"Lawyer"} width={"40%"} style={{}} />
         </div>
       </div>
 
       <div className={"flex flex-col w-full"}>
-        <div className={"flex flex-col gap-2"}>
-          {scripts.map((script, index) => (
-            <div
-              key={index}
-              className={
-                "flex gap-2 " +
-                (script.character === Character.JUDGE
-                  ? "justify-center"
-                  : script.character === Character.LAWYER
-                    ? "justify-start"
-                    : "justify-end")
-              }
-            >
-              <div
-                className={
-                  "p-2 bg-white rounded-lg shadow-md " +
-                  (script.character === "judge" ? "bg-red-100" : "bg-blue-100")
-                }
-              >
-                <p>{script.text}</p>
-              </div>
-            </div>
-          ))}
+        <div className={"flex flex-col gap-2 "}>
+          <DialogBox
+            displayedText={displayedText}
+            speaker={turn === "검사" ? "변호사" : "검사"}
+          />
         </div>
 
-        <textarea />
+        <Controls
+          onInput={handleInput}
+          onLifeChange={handleLifeChange}
+          currentTurn={turn}
+        />
       </div>
     </div>
   );
