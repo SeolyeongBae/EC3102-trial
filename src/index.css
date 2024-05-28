@@ -10,6 +10,14 @@
   src: url("assets/fonts/PretendardVariable.woff2") format("woff2-variations");
 }
 
-.button {
-  @apply border-2 border-black font-hanna rounded-2xl flex justify-center items-center min-h-[50px];
+@font-face {
+  font-family: "TTHakgyoansimYeohaengR";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_keris@1.0/TTHakgyoansimYeohaengR.woff2")
+    format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  @apply font-pretendard;
 }
