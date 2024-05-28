@@ -1,0 +1,94 @@
+{{- $component_type := "database" }}
+{{- with (get .Values $component_type) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Release.Name }}-{{ $component_type }}
+  labels:
+    {{- include "common_labels" (list $ $component_type) | nindent 4 }}
+spec:
+  replicas: {{ .replicas }}
+  strategy: {{ .strategy }}
+  selector:
+    matchLabels:
+      {{- include "common_labels" (list $ $component_type) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "common_labels" (list $ $component_type) | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ $component_type }}
+          image: {{ .image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .port }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Release.Name }}-{{ $component_type }}
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Release.Name }}-{{ $component_type }}
+                  key: password
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Release.Name }}-{{ $component_type }}
+                  key: dbname
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Release.Name }}-{{ $component_type }}
+                  key: username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Release.Name }}-{{ $component_type }}
+                  key: password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Release.Name }}-{{ $component_type }}
+                  key: dbname
+            - name: MYSQL_RANDOM_ROOT_PASSWORD
+              value: "yes"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Release.Name }}-{{ $component_type }}
+  labels:
+    {{- include "common_labels" (list $ $component_type) | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "common_labels" (list $ $component_type) | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: {{ .port }}
+      targetPort: {{ .port }}
+      name: http
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $.Release.Name }}-{{ $component_type }}
+  labels:
+      {{- include "common_labels" (list $ $component_type) | nindent 4 }}
+type: Opaque
+data:
+  username: {{ .username| b64enc | quote }}
+  dbname: {{ .dbname | b64enc | quote }}
+  # https://itnext.io/manage-auto-generated-secrets-in-your-helm-charts-5aee48ba6918 의 구현 가져옴
+
+  # 기존 secret이 있는지 본다. 없으면 secretObj와 secretData는 빈 dict임
+  {{- $secretObj := (lookup "v1" "Secret" $.Release.Namespace "{{ $.Release.Name }}-{{ $component_type }}") | default dict }}
+  {{- $secretData := (get $secretObj "data") | default dict }}
+  # secretData에서 기존 secret을 가져와보고, fallback으로 secret을 생성해서 넣는다
+  {{- $secretVal := (get $secretData "password") | default (randAlphaNum 32 | b64enc) }}
+  password: {{ $secretVal | quote }}
+{{- end -}}

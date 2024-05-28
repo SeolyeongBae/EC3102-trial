@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+    dash.ulagbulag.io/subject: mobilex-exp
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+      dash.ulagbulag.io/subject: mobilex-exp
+  template:
+    metadata:
+      labels:
+        app: frontend
+        dash.ulagbulag.io/subject: mobilex-exp
+    spec:
+      containers:
+        - name: server
+          # TODO(user): change to your image
+          image: quay.io/ulagbulag/mobilex-exp-frontend:v0.7
+          env:
+            - name: FRONTEND_CLIENT__BASE_URL
+              value: http://backend:8000
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 8501
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+    dash.ulagbulag.io/subject: mobilex-exp
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8501
+      targetPort: 8501

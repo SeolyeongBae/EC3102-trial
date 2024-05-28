@@ -1,0 +1,50 @@
+{{- $component_type := "frontend" }}
+{{- with (get .Values $component_type) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Release.Name }}-{{ $component_type }}
+  labels:
+    {{- include "common_labels" (list $ $component_type) | nindent 4 }}
+spec:
+  replicas: {{ .replicas }}
+  strategy: {{ .strategy }}
+  selector:
+    matchLabels:
+      {{- include "common_labels" (list $ $component_type) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "common_labels" (list $ $component_type) | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ $component_type }}
+          image: {{ .image }}
+          imagePullPolicy: Always
+          command:
+            - "streamlit"
+            - "run"
+            - "main.py"
+          env:
+            - name: STREAMLIT_SERVER_PORT
+              value: "{{ .port }}"
+          ports:
+            - containerPort: {{ .port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Release.Name }}-{{ $component_type }}
+  labels:
+    {{- include "common_labels" (list $ $component_type) | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "common_labels" (list $ $component_type) | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: {{ .port }}
+      targetPort: {{ .port }}
+      name: http
+---
+{{- end -}}

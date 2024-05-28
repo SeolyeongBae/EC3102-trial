@@ -1,0 +1,36 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gateway
+  annotations:
+    cert-manager.io/cluster-issuer: example.com # TODO(user): change to your domain
+    kubernetes.io/ingress.class: example.com # TODO(user): change to your domain
+    nginx.ingress.kubernetes.io/proxy-body-size: 200M
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  labels:
+    dash.ulagbulag.io/name: gateway
+spec:
+  tls:
+    - hosts:
+        - dev.example.com # TODO(user): change to your domain
+      secretName: dev.example.com-certs # TODO(user): change to your domain
+  rules:
+    - host: dev.example.com # TODO(user): change to your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+          - path: /api/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  name: http

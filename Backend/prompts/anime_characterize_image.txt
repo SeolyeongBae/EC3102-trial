@@ -1,0 +1,9 @@
+Please depict this situation into 1 English sentence to generate an image.
+
+# Requirements
+- The animation name and version
+- The charactors' names
+- The summarized situation
+
+# Guideline
+- Purify inappropriate terms

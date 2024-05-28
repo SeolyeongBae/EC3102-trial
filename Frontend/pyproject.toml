@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "mobilex-sample-project-frontend"
+version = "0.1.0"
+description = "MobileX Experience Lab Project - Frontend"
+authors = ["Sangyu Lee <me@sangyul.ee>", "Ho Kim <ho.kim@smartx.kr>"]
+readme = "README.md"
+repository = "https://github.com/HoKim98/mobilex-exp/tree/main/Frontend"
+include = ["./locales/**/*.yaml"]
+
+[[tool.poetry.packages]]
+include = "./functions/**/*.py"
+
+[[tool.poetry.packages]]
+include = "./models/**/*.py"
+
+[[tool.poetry.packages]]
+include = "./pages/**/*.py"
+
+[[tool.poetry.packages]]
+include = "./utils/**/*.py"
+
+[[tool.poetry.packages]]
+include = "./0_Home.py"
+
+[tool.poetry.dependencies]
+httpx = "*"
+i18nice = { version = "*", extras = ["YAML"] }
+python = ">=3.12,<3.13"
+python-dotenv = { version = "*" }
+streamlit = { version = "*" }
+streamlit-pydantic = { git = "https://github.com/HIL340/streamlit-pydantic.git", branch = "pydantic-2.7" }
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
