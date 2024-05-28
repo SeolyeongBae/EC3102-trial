@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Judge from "./assets/judge.webp";
 import Lawyer from "./assets/lawyer.webp";
 import LifeHearts from "./components/lifeHearts/LifeHearts";
+import Header from "./components/Header";
+import DialogBox from "./components/DialogBox";
+import Controls from "./components/Controls";
+
+const INITIAL_TEXT = "안녕하세요. 재판을 시작하겠습니다.";
 
 enum Character {
   JUDGE = "judge",
@@ -31,6 +36,56 @@ function App() {
     },
   ]);
 
+  const [turn, setTurn] = useState<string>("변호사");
+
+  const [prosecutorLife, setProsecutorLife] = useState<number>(3);
+  const [defenseLife, setDefenseLife] = useState<number>(3);
+
+  const [displayedText, setDisplayedText] = useState<string>(INITIAL_TEXT);
+  const [fullText, setFullText] = useState<string>(INITIAL_TEXT);
+
+  useEffect(() => {
+    if (prosecutorLife === 0) {
+      alert("증인은 무죄가 되었습니다");
+    } else if (defenseLife === 0) {
+      alert("증인은 유죄가 되었습니다");
+    }
+  }, [prosecutorLife, defenseLife]);
+
+  useEffect(() => {
+    if (fullText.length > 0 && displayedText !== fullText) {
+      // 같지 않을떄만 출력
+      let index = 0;
+
+      const intervalId = setInterval(() => {
+        setDisplayedText((prev) => `${prev}${fullText[index - 1]}`);
+        index++;
+        if (index >= fullText.length) {
+          clearInterval(intervalId);
+          setTimeout(() => {
+            setTurn("변호사");
+            setFullText("");
+            setDisplayedText("안녕하세요, 검사입니다."); //서버에서 받아온 검사의 말
+          }, 500);
+        }
+      }, 100);
+      return () => clearInterval(intervalId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullText]);
+
+  const handleInput = useCallback((input: string) => {
+    setFullText(input); //서버에서 받아온 변호사의 말
+    setDisplayedText(""); //타이핑 효과를 위해 displaytext는 비움
+    setTurn("검사");
+  }, []);
+
+  const handleLifeChange = (text: string) => {
+    setFullText(text);
+    setDisplayedText("");
+    setTurn("검사");
+  };
+
   return (
     <div className={"flex flex-col w-full items-center px-10 bg-amber-50 pt-5"}>
       <div className={"flex w-full gap-4"}>
@@ -47,8 +102,15 @@ function App() {
       </div>
 
       <div className={"grid grid-cols-3 w-full"}>
-        <div className={"flex flex-col items-center"}>
-          <LifeHearts life={3} left={3} />
+        <div className={"flex flex-col items-center relative"}>
+          <p
+            className={
+              "absolute top-[-60px] text-lg bg-white p-2 rounded-lg shadow-md"
+            }
+          >
+            YOU
+          </p>
+          <LifeHearts maximum={3} left={defenseLife} />
           <img
             src={Lawyer}
             alt={"Lawyer"}
@@ -63,46 +125,25 @@ function App() {
           <img src={Judge} alt={"Judge"} width={"40%"} />
         </div>
 
-        <div className={"flex flex-col items-center relative"}>
-          <p
-            className={
-              "absolute top-[-60px] text-lg bg-white p-2 rounded-lg shadow-md"
-            }
-          >
-            YOU
-          </p>
-          <LifeHearts life={3} left={3} />
+        <div className={"flex flex-col items-center"}>
+          <LifeHearts maximum={3} left={prosecutorLife} />
           <img src={Lawyer} alt={"Lawyer"} width={"40%"} style={{}} />
         </div>
       </div>
 
       <div className={"flex flex-col w-full"}>
-        <div className={"flex flex-col gap-2"}>
-          {scripts.map((script, index) => (
-            <div
-              key={index}
-              className={
-                "flex gap-2 " +
-                (script.character === Character.JUDGE
-                  ? "justify-center"
-                  : script.character === Character.PROSECUTOR
-                    ? "justify-start"
-                    : "justify-end")
-              }
-            >
-              <div
-                className={
-                  "p-2 bg-white rounded-lg shadow-md " +
-                  (script.character === "judge" ? "bg-red-100" : "bg-blue-100")
-                }
-              >
-                <p>{script.text}</p>
-              </div>
-            </div>
-          ))}
+        <div className={"flex flex-col gap-2 "}>
+          <DialogBox
+            displayedText={displayedText}
+            speaker={turn === "검사" ? "변호사" : "검사"}
+          />
         </div>
 
-        <textarea />
+        <Controls
+          onInput={handleInput}
+          onLifeChange={handleLifeChange}
+          currentTurn={turn}
+        />
       </div>
     </div>
   );

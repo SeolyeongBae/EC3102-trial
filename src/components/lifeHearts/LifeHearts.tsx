@@ -4,12 +4,12 @@ import React, { useEffect, useRef } from "react";
 
 import Heart from "./Heart";
 interface LifeHeartsProps {
-  life: number;
+  maximum: number;
   left: number;
   style?: React.CSSProperties;
 }
 
-const LifeHearts = ({ life, left }: LifeHeartsProps) => {
+const LifeHearts = ({ maximum, left }: LifeHeartsProps) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -23,12 +23,12 @@ const LifeHearts = ({ life, left }: LifeHeartsProps) => {
         clearTimeout(blurTimeout);
       };
     }
-  }, [life]);
+  }, [maximum]);
 
   return (
     <>
       <div className={"flex nowrap"}>
-        {[...Array(life)].map((_, index) => (
+        {[...Array(maximum)].map((_, index) => (
           <Heart key={index} checked={index >= left} />
         ))}
       </div>
