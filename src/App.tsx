@@ -1,5 +1,3 @@
-import "./App.css";
-
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import styled, { CSSProperties } from "styled-components";
