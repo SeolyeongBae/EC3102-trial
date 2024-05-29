@@ -1,4 +1,5 @@
-# GIST Infoteam Frontend Template
+<img width="227" alt="image" src="https://github.com/dohyun-ko/EC3102-trial-fe/assets/80435616/7eacbe8e-0ec6-4dc4-aee3-05877fc0b2f9">
+
 
 ## 구성 요소
 
