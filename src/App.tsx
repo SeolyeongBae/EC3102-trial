@@ -5,9 +5,9 @@ import Lawyer from "./assets/lawyer.webp";
 import Prosecutor from "./assets/pro.png";
 import Controls from "./components/Controls";
 import DialogBox from "./components/DialogBox";
+import EvidenceList from "./components/Evidancelist";
 import LifeHearts from "./components/lifeHearts/LifeHearts";
 import { Character } from "./const";
-import EvidenceList from "./components/Evidancelist";
 
 const INITIAL_TEXT = "안녕하세요. 재판을 시작하겠습니다.";
 
@@ -17,7 +17,7 @@ function App() {
   const [prosecutorLife, setProsecutorLife] = useState<number>(3);
   const [defenseLife, setDefenseLife] = useState<number>(3);
 
-  const [displayedText, setDisplayedText] = useState<string>(INITIAL_TEXT);
+  const [displayedText, setDisplayedText] = useState<string>(INITIAL_TEXT); //검사의 말
   const [fullText, setFullText] = useState<string>(INITIAL_TEXT);
   const [showModal, setShowModal] = useState(false);
 
@@ -30,39 +30,21 @@ function App() {
   }, [prosecutorLife, defenseLife]);
 
   useEffect(() => {
-    if (fullText.length > 0 && displayedText !== fullText) {
-      // 같지 않을떄만 출력
-      let index = 0;
+    setTimeout(() => {
+      setDisplayedText("안녕하세요, 검사입니다."); //서버에서 받아온 검사의 말
+      setTurn(() => Character.LAWYER);
+    }, 500);
 
-      const intervalId = setInterval(() => {
-        setDisplayedText((prev) => `${prev}${fullText[index - 1]}`);
-        index++;
-        if (index >= fullText.length) {
-          clearInterval(intervalId);
-          setTimeout(() => {
-            setTurn(Character.LAWYER);
-            setFullText("");
-            setDisplayedText("안녕하세요, 검사입니다."); //서버에서 받아온 검사의 말
-          }, 500);
-        }
-      }, 100);
-      return () => clearInterval(intervalId);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fullText]);
 
   const handleInput = useCallback((input: string) => {
-    setFullText(input); //서버에서 받아온 변호사의 말
-    setDisplayedText(""); //타이핑 효과를 위해 displaytext는 비움
-    setTurn(Character.PROSECUTOR);
+    if (input.length !== 0) {
+      setFullText(input); //서버에서 받아온 변호사의 말
+      setTurn(Character.PROSECUTOR);
+    }
   }, []);
 
-  const handleTurnChange = (text: string) => {
-    setFullText(text);
-    setDisplayedText("");
-    setTurn(Character.PROSECUTOR);
-  };
-  //(e.target.id === "modal-background"에 맞게 e에 타입달아줘
   const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       setShowModal(false);
@@ -118,22 +100,14 @@ function App() {
       </div>
 
       <div className={"flex flex-col w-full"}>
-        <div className={"flex flex-col gap-2 "}>
+        <div className={"flex flex-col gap-2"}>
           <DialogBox
             displayedText={displayedText}
-            speaker={
-              turn === Character.PROSECUTOR
-                ? Character.LAWYER
-                : Character.PROSECUTOR
-            }
+            speaker={Character.PROSECUTOR}
           />
         </div>
 
-        <Controls
-          onInput={handleInput}
-          onTurnChange={handleTurnChange}
-          currentTurn={turn}
-        />
+        <Controls onInput={handleInput} currentTurn={turn} />
       </div>
       {showModal ? (
         <>
