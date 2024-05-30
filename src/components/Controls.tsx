@@ -28,7 +28,7 @@ const Controls: React.FC<ControlsProps> = ({ onInput, currentTurn }) => {
     <>
       <textarea
         placeholder="응답을 입력하세요"
-        className="dialog-box p-2 bg-white rounded-lg shadow-md h-48 text-center bg-gray-100"
+        className="text-xl dialog-box p-2 bg-white rounded-lg shadow-md h-48 text-center bg-gray-100"
         onChange={handleInputChange}
         value={input}
       />
