@@ -7,6 +7,7 @@ import Controls from "./components/Controls";
 import DialogBox from "./components/DialogBox";
 import LifeHearts from "./components/lifeHearts/LifeHearts";
 import { Character } from "./const";
+import EvidenceList from "./components/Evidancelist";
 
 const INITIAL_TEXT = "안녕하세요. 재판을 시작하겠습니다.";
 
@@ -18,6 +19,7 @@ function App() {
 
   const [displayedText, setDisplayedText] = useState<string>(INITIAL_TEXT);
   const [fullText, setFullText] = useState<string>(INITIAL_TEXT);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (prosecutorLife === 0) {
@@ -60,6 +62,12 @@ function App() {
     setDisplayedText("");
     setTurn(Character.PROSECUTOR);
   };
+  //(e.target.id === "modal-background"에 맞게 e에 타입달아줘
+  const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setShowModal(false);
+    }
+  };
 
   return (
     <div className={"flex flex-col w-full items-center px-10 bg-amber-50 pt-5"}>
@@ -67,7 +75,10 @@ function App() {
         <button className={"py-2 px-8 text-lg hover:bg-[rgba(0,0,0,0.1)]"}>
           <p>재판</p>
         </button>
-        <button className={"py-2 px-8 text-lg hover:bg-[rgba(0,0,0,0.1)]"}>
+        <button
+          className={"py-2 px-8 text-lg hover:bg-[rgba(0,0,0,0.1)]"}
+          onClick={() => setShowModal(true)}
+        >
           <p>사건 개요</p>
         </button>
       </div>
@@ -124,6 +135,39 @@ function App() {
           currentTurn={turn}
         />
       </div>
+      {showModal ? (
+        <>
+          <div
+            id="modal-background"
+            className="fixed inset-0 flex items-center justify-center z-50"
+            onClick={handleClose}
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg p-8 w-1/2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h1 className="text-xl font-bold mb-4">사건 개요</h1>
+              <p className="mb-4 text-lg ">
+                2024년 5월 15일 밤, GIST(광주과학기술원) EECS(전자공학 및
+                컴퓨터공학) 서버실에서 서버실 에어컨이 강제 종료되는 사건이
+                발생했습니다. 이로 인해 서버 과열로 중요한 연구 데이터가
+                손상되었습니다. 사건 당시, 서버실은 대학원생 박모 씨가
+                마지막으로 사용한 것으로 확인되었습니다. 박모 씨는 교수님의
+                과도한 업무 지시로 인해 밤 늦게까지 업무를 수행하던 중이었으며,
+                에어컨을 끄고 서버실을 떠났다는 의심을 받고 있습니다.
+              </p>
+              <EvidenceList />
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+                onClick={() => setShowModal(false)}
+              >
+                창 닫기
+              </button>
+            </div>
+          </div>
+          <div className="fixed inset-0 bg-black opacity-50 z-40"></div>
+        </>
+      ) : null}
     </div>
   );
 }
