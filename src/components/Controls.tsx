@@ -1,14 +1,15 @@
 import React, { useState } from "react";
+import { Character } from "src/const";
 
 interface ControlsProps {
   onInput: (input: string) => void;
-  onLifeChange: (text: string) => void;
+  onTurnChange: (text: string) => void;
   currentTurn: string;
 }
 
 const Controls: React.FC<ControlsProps> = ({
   onInput,
-  onLifeChange,
+  onTurnChange,
   currentTurn,
 }) => {
   const [input, setInput] = useState<string>("");
@@ -24,7 +25,7 @@ const Controls: React.FC<ControlsProps> = ({
     }
   };
 
-  if (currentTurn === "검사") {
+  if (currentTurn === Character.PROSECUTOR) {
     return null;
   }
 
@@ -32,13 +33,13 @@ const Controls: React.FC<ControlsProps> = ({
     <div className="flex justify-center space-x-4 mt-4">
       <button
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        onClick={() => onLifeChange("이의있음")}
+        onClick={() => onTurnChange("이의있음!")}
       >
         이의있음!
       </button>
       <button
         className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        onClick={() => onLifeChange("받아랏")}
+        onClick={() => onTurnChange("받아랏!")}
       >
         받아랏!
       </button>

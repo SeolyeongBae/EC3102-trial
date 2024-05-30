@@ -2,41 +2,16 @@ import { useCallback, useEffect, useState } from "react";
 
 import Judge from "./assets/judge.webp";
 import Lawyer from "./assets/lawyer.webp";
-import LifeHearts from "./components/lifeHearts/LifeHearts";
-import Header from "./components/Header";
-import DialogBox from "./components/DialogBox";
+import Prosecutor from "./assets/pro.png";
 import Controls from "./components/Controls";
+import DialogBox from "./components/DialogBox";
+import LifeHearts from "./components/lifeHearts/LifeHearts";
+import { Character } from "./const";
 
 const INITIAL_TEXT = "안녕하세요. 재판을 시작하겠습니다.";
 
-enum Character {
-  JUDGE = "judge",
-  LAWYER = "lawyer",
-  PROSECUTOR = "prosecutor",
-}
-
 function App() {
-  const [scripts, setScripts] = useState<
-    {
-      character: string;
-      text: string;
-    }[]
-  >([
-    {
-      character: Character.JUDGE,
-      text: "안녕하세요. 재판을 시작하겠습니다.",
-    },
-    {
-      character: Character.LAWYER,
-      text: "안녕하세요. 변호사 홍길동입니다.",
-    },
-    {
-      character: Character.PROSECUTOR,
-      text: "안녕하세요. 검사 김철수입니다.",
-    },
-  ]);
-
-  const [turn, setTurn] = useState<string>("변호사");
+  const [turn, setTurn] = useState<string>(Character.LAWYER);
 
   const [prosecutorLife, setProsecutorLife] = useState<number>(3);
   const [defenseLife, setDefenseLife] = useState<number>(3);
@@ -63,7 +38,7 @@ function App() {
         if (index >= fullText.length) {
           clearInterval(intervalId);
           setTimeout(() => {
-            setTurn("변호사");
+            setTurn(Character.LAWYER);
             setFullText("");
             setDisplayedText("안녕하세요, 검사입니다."); //서버에서 받아온 검사의 말
           }, 500);
@@ -77,13 +52,13 @@ function App() {
   const handleInput = useCallback((input: string) => {
     setFullText(input); //서버에서 받아온 변호사의 말
     setDisplayedText(""); //타이핑 효과를 위해 displaytext는 비움
-    setTurn("검사");
+    setTurn(Character.PROSECUTOR);
   }, []);
 
-  const handleLifeChange = (text: string) => {
+  const handleTurnChange = (text: string) => {
     setFullText(text);
     setDisplayedText("");
-    setTurn("검사");
+    setTurn(Character.PROSECUTOR);
   };
 
   return (
@@ -112,9 +87,9 @@ function App() {
           </p>
           <LifeHearts maximum={3} left={defenseLife} />
           <img
-            src={Lawyer}
+            src={Prosecutor}
             alt={"Lawyer"}
-            width={"40%"}
+            width={"35%"}
             style={{
               transform: "scaleX(-1)",
             }}
@@ -135,13 +110,17 @@ function App() {
         <div className={"flex flex-col gap-2 "}>
           <DialogBox
             displayedText={displayedText}
-            speaker={turn === "검사" ? "변호사" : "검사"}
+            speaker={
+              turn === Character.PROSECUTOR
+                ? Character.LAWYER
+                : Character.PROSECUTOR
+            }
           />
         </div>
 
         <Controls
           onInput={handleInput}
-          onLifeChange={handleLifeChange}
+          onTurnChange={handleTurnChange}
           currentTurn={turn}
         />
       </div>
