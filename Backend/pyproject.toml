@@ -16,8 +16,8 @@ include = "./models/**/*.py"
 [[tool.poetry.packages]]
 include = "./routers/**/*.py"
 
-[[tool.poetry.packages]]
-include = "./0_Home.py"
+# [[tool.poetry.packages]]
+# include = "./0_Home.py"
 
 [tool.poetry.dependencies]
 fastapi = "*"
