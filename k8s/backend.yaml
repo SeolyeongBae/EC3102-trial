@@ -20,7 +20,7 @@ spec:
       containers:
         - name: server
           # TODO(user): change to your image
-          image: quay.io/ulagbulag/mobilex-exp-backend:v0.7
+          image: docker.io/dohyun682/ec3102-trial-backend:0.0.5
           env:
             - name: BASE_URL
               value: /api/v1
