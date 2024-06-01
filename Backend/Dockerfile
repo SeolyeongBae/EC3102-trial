@@ -18,8 +18,7 @@ RUN pip install --no-cache-dir "poetry==${POETRY_VERSION}"
 
 # Load package metadata
 WORKDIR /app
-
-COPY pyproject.toml ./
+COPY pyproject.toml poetry.lock ./
 
 # Install package dependencies
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR} \
@@ -28,14 +27,21 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR} \
 # --- runtime ----
 FROM "docker.io/library/python:${PYTHON_VERSION}-slim-${PYTHON_DIST}" as runtime
 
-# Configure entrypoint
-ENTRYPOINT ["/usr/bin/env"]
-CMD [ "fastapi", "run", "main.py" ]
-
 # Configure runtime environment variables
 ENV PATH="/app/.venv/bin:${PATH}"
 
-# Load package source codes
+# Set working directory
 WORKDIR /app
+
+# Copy virtual environment from the builder
 COPY --from=builder /app/.venv .venv
-ADD ./ .
+
+# Copy application source code
+COPY . .
+
+# Set the entrypoint and command to run FastAPI
+ENTRYPOINT ["python", "-m", "uvicorn"]
+CMD ["main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# Expose the application port
+EXPOSE 8000

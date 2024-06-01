@@ -1,0 +1,17 @@
+FROM python:3.12-slim
+# --- builder ----
+# Install poetry
+RUN pip install "poetry"
+
+# Load package metadata
+WORKDIR /app
+
+COPY . .
+
+# Install package dependencies
+RUN poetry install
+
+CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# Expose the application port
+EXPOSE 8000
