@@ -40,6 +40,9 @@ async def get_root():
 async def get_initial_story():
     return trial.initialize_game()
 
+@app.get("/trial/{trial_id}")
+async def get_trial(trial_id: str):
+    return trial.get_trial(trial_id)
 
 @app.post("/prosecutor/{trial_id}")
 async def generate_prosecutor_speech(trial_id: str):

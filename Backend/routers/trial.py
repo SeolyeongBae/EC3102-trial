@@ -1,6 +1,12 @@
 from dotenv import load_dotenv
 import uuid
 from openai import OpenAI
+import os
+from . import firebase
+
+load_dotenv()
+
+OpenAI.api_key = os.getenv("OPENAI_API_KEY")
 
 prosecutor_json_format = f'''
     {{
@@ -23,8 +29,6 @@ judge_json_format = f'''
         "winner": "prosecutor | lawyer"
     }}
     '''
-
-trials = {}
 
 def initialize_game():
     cases = {
@@ -53,8 +57,6 @@ def initialize_game():
         }
     }
 
-    trial_id = str(uuid.uuid4())
-
     evidences = '''
 증거물 1: 서버실 출입 기록
 변호사: 서버실 출입 기록에 따르면 사건 발생 시간대에 박모 씨 외에도 서버실을 출입한 다른 사람이 있었다.
@@ -72,7 +74,10 @@ def initialize_game():
 변호사: 에어컨 조작 패널에서 박모 씨의 지문 외에도 다른 사람의 지문이 발견되었다.
 검사: 에어컨 조작 패널에서 박모 씨의 지문이 가장 선명하게 나타나며, 이는 박모 씨가 에어컨을 조작했음을 시사한다.'''
 
-    trials[trial_id] = {
+    trial_id = str(uuid.uuid4())
+
+    data = {
+        "trial_id": trial_id,
         "description": "2024년 5월 15일 밤, GIST(광주과학기술원) EECS(전자공학 및 컴퓨터공학) 서버실에서 서버실 에어컨이 강제 종료되는 사건이 발생했습니다. 이로 인해 서버 과열로 중요한 연구 데이터가 손상되었습니다. 사건 당시, 서버실은 대학원생 박모 씨가 마지막으로 사용한 것으로 확인되었습니다. 박모 씨는 교수님의 과도한 업무 지시로 인해 밤 늦게까지 업무를 수행하던 중이었으며, 에어컨을 끄고 서버실을 떠났다는 의심을 받고 있습니다.",
         "evidences": evidences,
         "scripts": [],
@@ -80,12 +85,13 @@ def initialize_game():
         "lawyer_life": 3,
     }
         
+    firebase.save_data(trial_id, data)
 
-    return {
-        'case': cases["도난 사건"]["prosecutor_prompt"],        
-        'game_id': trial_id
-    }
+    return data
 
+
+def get_trial(trial_id):
+    return firebase.read_data(trial_id)
 
 # LLM을 호출하는 함수
 def get_response(role, content, examples=None):
@@ -107,7 +113,7 @@ def get_response(role, content, examples=None):
 
     messages.append({"role": "user", "content": content})
 
-    response = openai.ChatCompletion.create(
+    response = OpenAI.ChatCompletion.create(
         model="gpt-4o",
         response_format={ "type": "json_object" },
         messages=messages
@@ -118,7 +124,9 @@ def get_response(role, content, examples=None):
 
 def generate_prosecutor(trial_id):
 
-    response = get_response("prosecutor", "존경하는 재판장님, 배심원 여러분. 다음 증거를 제시하겠습니다. ", trials[trial_id]["scripts"])
+    trial = firebase.read_data(trial_id)
+
+    response = get_response("prosecutor", "존경하는 재판장님, 배심원 여러분. 다음 증거를 제시하겠습니다. ", trial["scripts"])
 
     trials[trial_id]["scripts"].append(response)
     
