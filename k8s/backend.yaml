@@ -20,7 +20,7 @@ spec:
       containers:
         - name: server
           # TODO(user): change to your image
-          image: docker.io/dohyun682/ec3102-trial-backend:0.0.5
+          image: docker.io/dohyun682/ec3102-trial-backend:0.1.0
           env:
             - name: BASE_URL
               value: /api/v1
@@ -29,7 +29,7 @@ spec:
                 secretKeyRef:
                   name: openai
                   key: OPENAI_API_KEY
-            - name: FIREBASE_CREDENTIALS
+            - name: FIREBASE_CREDENTIALS_PATH
               value: /secrets/firebase-credentials.json
           ports:
             - name: http
@@ -39,6 +39,8 @@ spec:
             - name: huggingface-hub-token
               mountPath: /root/.cache/huggingface/token
               subPath: token
+            - name: firebase-credentials
+              mountPath: /secrets
       volumes:
         - name: huggingface-hub-token
           secret:
