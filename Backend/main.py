@@ -6,7 +6,6 @@ from pydantic import BaseModel
 from enum import Enum
 from fastapi import Path
 
-
 class LawyerSpeech(BaseModel):
     text: str
 
