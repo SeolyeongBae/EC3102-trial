@@ -3,10 +3,13 @@ import uuid
 from openai import OpenAI
 import os
 from . import firebase
+import json
 
 load_dotenv()
 
-OpenAI.api_key = os.getenv("OPENAI_API_KEY")
+client=OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
 
 prosecutor_json_format = f'''
     {{
@@ -94,7 +97,7 @@ def get_trial(trial_id):
     return firebase.read_data(trial_id)
 
 # LLM을 호출하는 함수
-def get_response(role, content, examples=None):
+def get_response(role, trial, content=None):
 
     if role == "prosecutor":
         json_format = prosecutor_json_format
@@ -105,45 +108,77 @@ def get_response(role, content, examples=None):
 
     messages = [{"role": "system", "content": f"You are a {role}. Please respond to the following conversation. Response in json format. The format is as follows: " + json_format},]
 
-    if examples:
-        for example in examples:
-            messages.append({"role": "system", "content": example["system"]})
-            messages.append({"role": "user", "content": example["user"]})
-            messages.append({"role": "assistant", "content": example["assistant"]})
+    messages.append({"role": "system", "content": f"Prior knowledge - trial description: {trial["description"]}"})
 
-    messages.append({"role": "user", "content": content})
+    messages.append({"role": "system", "content": f"Prior knowledge - evidences: {trial["evidences"]}"})
 
-    response = OpenAI.ChatCompletion.create(
+    messages.append({"role": "system", "content": f"Prior knowledge - scripts: {trial['scripts']}"})
+
+    if content:
+        messages.append({"role": "user", "content": content})
+    else:
+        messages.append({"role": "user", "content": f"What {role} should say?"})
+
+    response = client.chat.completions.create(
         model="gpt-4o",
         response_format={ "type": "json_object" },
         messages=messages
     )
 
-    return response['choices'][0]['message']['content']
+    return json.loads(response.choices[0].message.content)
 
 
 def generate_prosecutor(trial_id):
 
     trial = firebase.read_data(trial_id)
 
-    response = get_response("prosecutor", "존경하는 재판장님, 배심원 여러분. 다음 증거를 제시하겠습니다. ", trial["scripts"])
+    response = get_response("prosecutor", trial)
 
-    trials[trial_id]["scripts"].append(response)
+    trial["scripts"].append(response)
     
-    return response
+    firebase.update_data(trial_id, trial)
+
+    return trial
 
 
 def post_lawyer_script(trial_id, script):
-    trials[trial_id]["scripts"].append(script)
+    trial = firebase.read_data(trial_id)
 
-    generate_prosecutor(trial_id)
+    trial["scripts"].append({"role": "lawyer", "text": script})
 
-    return trials[trial_id]["scripts"]
+    firebase.update_data(trial_id, trial)
+
+    return trial
+
+def generate_lawyer(trial_id, action):
+    trial = firebase.read_data(trial_id)
+
+    if action == "이의있음":
+        prompt = "lawyer는 검사의 주장에 이의를 제기하려고 합니다. lawyer는 뭐라고 말할까요?"
+    elif action == "받아랏":
+        prompt = "lawyer는 증거를 이용해 검사의 주장을 반박하려고 합니다. lawyer는 뭐라고 말할까요?"
+
+    response = get_response("lawyer", trial, prompt)
+
+    trial["scripts"].append(response)
+
+    firebase.update_data(trial_id, trial)
+
+    return trial
 
 
 def generate_judge(trial_id):
-    response = get_response("judge", "존경하는 판사님. 검사와 변호사의 주장을 듣고 더 타당한 주장을 판단하세요.", trials[trial_id]["scripts"])
+    trial = firebase.read_data(trial_id)
 
-    trials[trial_id]["scripts"].append(response)
+    response = get_response("judge", trial)
 
-    return response
+    if response["winner"] == "prosecutor":
+        trial["lawyer_life"] -= 1
+    elif response["winner"] == "lawyer":
+        trial["prosecutor_life"] -= 1
+
+    trial["scripts"].append(response)
+
+    firebase.update_data(trial_id, trial)
+
+    return trial

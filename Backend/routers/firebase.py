@@ -18,6 +18,9 @@ db = firestore.client()
 def save_data(trial_id, data):
     db.collection('trials').document(trial_id).set(data)
 
+def update_data(trial_id, data):
+    db.collection('trials').document(trial_id).update(data)
+
 # Firebase에서 데이터 읽어오기
 def read_data(trial_id):
     doc_ref = db.collection('trials').document(trial_id)
