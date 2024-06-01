@@ -11,7 +11,7 @@ firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://ec3102-cfed4-default-rtdb.asia-southeast1.firebasedatabase.app/'
 })
 
-
+# Firebase에 데이터 저장하기
 def save_data(prosecutor_statement, player_statement, judge_decision):
     ref = db.reference('game_logs')
     log_entry = {
@@ -22,7 +22,7 @@ def save_data(prosecutor_statement, player_statement, judge_decision):
     }
     ref.push(log_entry)
 
-
+# Firebase에서 데이터 읽어오기
 def read_data(path):
     ref = db.reference(path)
     data = ref.get()
