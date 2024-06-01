@@ -170,3 +170,5 @@ cython_debug/
 # Dockerfile
 /.dockerignore
 /Dockerfile
+
+firebase-credentials.json

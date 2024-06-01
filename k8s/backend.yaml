@@ -29,6 +29,8 @@ spec:
                 secretKeyRef:
                   name: openai
                   key: OPENAI_API_KEY
+            - name: FIREBASE_CREDENTIALS
+              value: /secrets/firebase-credentials.json
           ports:
             - name: http
               protocol: TCP
@@ -44,6 +46,12 @@ spec:
             items:
               - key: HUGGING_FACE_HUB_TOKEN
                 path: token
+        - name: firebase-credentials
+          secret:
+            secretName: firebase-credentials
+        - name: openai
+          secret:
+            secretName: openai
 ---
 apiVersion: v1
 kind: Service
