@@ -8,6 +8,7 @@ import DialogBox from "./components/DialogBox";
 import EvidenceList from "./components/Evidancelist";
 import LifeHearts from "./components/lifeHearts/LifeHearts";
 import { Character } from "./const";
+import { useQuery } from "@tanstack/react-query";
 
 const INITIAL_TEXT = "안녕하세요. 재판을 시작하겠습니다.";
 
@@ -20,6 +21,23 @@ function App() {
   const [displayedText, setDisplayedText] = useState<string>(INITIAL_TEXT); //검사의 말
   const [fullText, setFullText] = useState<string>(INITIAL_TEXT);
   const [showModal, setShowModal] = useState(false);
+
+  const { data, error, refetch } = useQuery({
+    queryKey: ["trialData"],
+    queryFn: () =>
+      fetch("https://computer-system-team-02.dev.mobilex.kr/api/v1/init").then(
+        (res) => res.json(),
+      ),
+  });
+
+  useEffect(() => {
+    if (data) {
+      setProsecutorLife(data.prosecutor_life);
+      setDefenseLife(data.lawyer_life);
+      setDisplayedText(data.description);
+      setTurn(Character.LAWYER);
+    }
+  }, [data]);
 
   useEffect(() => {
     if (prosecutorLife === 0) {

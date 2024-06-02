@@ -10,6 +10,7 @@
     "lint": "eslint src/"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.40.0",
     "autoprefixer": "^10.4.19",
     "i18next": "^23.7.16",
     "i18next-browser-languagedetector": "^7.2.0",
