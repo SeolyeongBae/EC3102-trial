@@ -80,7 +80,7 @@ def get_response(role, trial, content=None):
     if content:
         messages.append({"role": "user", "content": content})
     else:
-        messages.append({"role": "user", "content": f"What {role} should say?"})
+        messages.append({"role": "user", "content": f"What {role} should say? Please respond in Korean."})
 
     response = client.chat.completions.create(
         model="gpt-4o",
@@ -117,9 +117,9 @@ def generate_lawyer(trial_id, action):
     trial = firebase.read_data(trial_id)
 
     if action == "이의있음":
-        prompt = "lawyer는 검사의 주장에 이의를 제기하려고 합니다. lawyer는 뭐라고 말할까요?"
+        prompt = "lawyer는 검사의 주장에 이의를 제기하려고 합니다. lawyer는 뭐라고 말할까요? 한국어로 작성해주세요."
     elif action == "받아랏":
-        prompt = "lawyer는 증거를 이용해 검사의 주장을 반박하려고 합니다. lawyer는 뭐라고 말할까요?"
+        prompt = "lawyer는 증거를 이용해 검사의 주장을 반박하려고 합니다. lawyer는 뭐라고 말할까요? 한국어로 작성해주세요."
 
     response = get_response("lawyer", trial, prompt)
 
