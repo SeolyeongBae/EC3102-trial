@@ -150,7 +150,9 @@ function App() {
       <div className={"flex flex-col w-full"}>
         <div className={"flex flex-col gap-2"}>
           <DialogBox
-            displayedText={displayedText}
+            displayedText={
+              prosecutorMutation.isPending ? "(자료 정리 중)" : displayedText
+            }
             speaker={Character.PROSECUTOR}
           />
         </div>
