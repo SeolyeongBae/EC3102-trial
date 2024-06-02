@@ -1,5 +1,7 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
+import { fetchProsecutorScript } from "./apis";
 import Judge from "./assets/judge.webp";
 import Lawyer from "./assets/lawyer.webp";
 import Prosecutor from "./assets/pro.png";
@@ -8,7 +10,6 @@ import DialogBox from "./components/DialogBox";
 import EvidenceList from "./components/Evidancelist";
 import LifeHearts from "./components/lifeHearts/LifeHearts";
 import { Character } from "./const";
-import { useQuery } from "@tanstack/react-query";
 
 const INITIAL_TEXT = "안녕하세요. 재판을 시작하겠습니다.";
 
@@ -21,6 +22,7 @@ function App() {
   const [displayedText, setDisplayedText] = useState<string>(INITIAL_TEXT); //검사의 말
   const [fullText, setFullText] = useState<string>(INITIAL_TEXT);
   const [showModal, setShowModal] = useState(false);
+  const [trialId, setTrialId] = useState<string | null>(null); // trial_id 상태 추가
 
   const { data, error, refetch } = useQuery({
     queryKey: ["trialData"],
@@ -31,15 +33,30 @@ function App() {
           "Content-Type": "application/json",
         },
       }).then((res) => res.json()),
+    enabled: false, // 처음에는 비활성화, 버튼 클릭 시 활성화
+  });
+
+  const prosecutorMutation = useMutation({
+    mutationFn: (trial_id: string) => fetchProsecutorScript(trial_id),
+    onSuccess: (data) => {
+      if (data.scripts && data.scripts.length > 0) {
+        const prosecutorScript = data.scripts[0];
+        if (prosecutorScript) {
+          setDisplayedText(prosecutorScript.text);
+        }
+      }
+    },
   });
 
   useEffect(() => {
     if (data) {
+      setTrialId(data.trial_id); // trial_id 저장
       setProsecutorLife(data.prosecutor_life);
       setDefenseLife(data.lawyer_life);
-      setDisplayedText(data.description);
-      setTurn(Character.LAWYER);
+
+      prosecutorMutation.mutate(data.trial_id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   useEffect(() => {
@@ -75,8 +92,11 @@ function App() {
   return (
     <div className={"flex flex-col w-full items-center px-10 bg-amber-50 pt-5"}>
       <div className={"flex w-full gap-4"}>
-        <button className={"py-2 px-8 text-lg hover:bg-[rgba(0,0,0,0.1)]"}>
-          <p>재판</p>
+        <button
+          className={"py-2 px-8 text-lg hover:bg-[rgba(0,0,0,0.1)]"}
+          onClick={() => refetch()}
+        >
+          <p>시작</p>
         </button>
         <button
           className={"py-2 px-8 text-lg hover:bg-[rgba(0,0,0,0.1)]"}
