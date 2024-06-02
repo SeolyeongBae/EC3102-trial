@@ -7,6 +7,7 @@ metadata:
     app: backend
     dash.ulagbulag.io/subject: mobilex-exp
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: backend
