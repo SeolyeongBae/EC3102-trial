@@ -25,9 +25,12 @@ function App() {
   const { data, error, refetch } = useQuery({
     queryKey: ["trialData"],
     queryFn: () =>
-      fetch("https://computer-system-team-02.dev.mobilex.kr/api/v1/init").then(
-        (res) => res.json(),
-      ),
+      fetch("/api/v1/init", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((res) => res.json()),
   });
 
   useEffect(() => {
