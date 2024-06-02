@@ -40,9 +40,15 @@ function App() {
     mutationFn: (trial_id: string) => fetchProsecutorScript(trial_id),
     onSuccess: (data) => {
       if (data.scripts && data.scripts.length > 0) {
-        const prosecutorScript = data.scripts[0];
+        //data.scripts에서 뒤에서부터 찾다가 role이 prosecutor 인거만 찾아줘
+        const prosecutorScript = data.scripts
+          .slice()
+          .reverse()
+          .find((script: any) => script.role === "prosecutor");
+
         if (prosecutorScript) {
           setDisplayedText(prosecutorScript.text);
+          setTurn(() => Character.LAWYER);
         }
       }
     },
@@ -53,11 +59,21 @@ function App() {
       setTrialId(data.trial_id); // trial_id 저장
       setProsecutorLife(data.prosecutor_life);
       setDefenseLife(data.lawyer_life);
-
-      prosecutorMutation.mutate(data.trial_id);
+      setTurn(Character.PROSECUTOR);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  useEffect(() => {
+    if (
+      turn === Character.PROSECUTOR &&
+      trialId &&
+      !prosecutorMutation.isPending
+    ) {
+      prosecutorMutation.mutate(trialId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turn, trialId]);
 
   useEffect(() => {
     if (prosecutorLife === 0) {
@@ -67,18 +83,9 @@ function App() {
     }
   }, [prosecutorLife, defenseLife]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setDisplayedText("안녕하세요, 검사입니다."); //서버에서 받아온 검사의 말
-      setTurn(() => Character.LAWYER);
-    }, 500);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fullText]);
-
   const handleInput = useCallback((input: string) => {
     if (input.length !== 0) {
-      setFullText(input); //서버에서 받아온 변호사의 말
+      setFullText(input); //변호사가 한 말을 저장, 서버로 보냄
       setTurn(Character.PROSECUTOR);
     }
   }, []);
