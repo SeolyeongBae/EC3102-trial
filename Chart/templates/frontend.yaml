@@ -1,50 +1,47 @@
-{{- $component_type := "frontend" }}
-{{- with (get .Values $component_type) -}}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $.Release.Name }}-{{ $component_type }}
+  name: frontend
   labels:
-    {{- include "common_labels" (list $ $component_type) | nindent 4 }}
+    app: frontend
+    dash.ulagbulag.io/subject: mobilex-exp
 spec:
-  replicas: {{ .replicas }}
-  strategy: {{ .strategy }}
   selector:
     matchLabels:
-      {{- include "common_labels" (list $ $component_type) | nindent 6 }}
+      app: frontend
+      dash.ulagbulag.io/subject: mobilex-exp
   template:
     metadata:
       labels:
-        {{- include "common_labels" (list $ $component_type) | nindent 8 }}
+        app: frontend
+        dash.ulagbulag.io/subject: mobilex-exp
     spec:
       containers:
-        - name: {{ $component_type }}
-          image: {{ .image }}
-          imagePullPolicy: Always
-          command:
-            - "streamlit"
-            - "run"
-            - "main.py"
+        - name: server
+          # TODO(user): change to your image
+          image: docker.io/seolyeong/ec3102-trial-fe:v0.2
           env:
-            - name: STREAMLIT_SERVER_PORT
-              value: "{{ .port }}"
+            - name: FRONTEND_CLIENT__BASE_URL
+              value: http://backend:8000
           ports:
-            - containerPort: {{ .port }}
+            - name: http
+              protocol: TCP
+              containerPort: 3000
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $.Release.Name }}-{{ $component_type }}
+  name: frontend
   labels:
-    {{- include "common_labels" (list $ $component_type) | nindent 4 }}
+    app: frontend
+    dash.ulagbulag.io/subject: mobilex-exp
 spec:
   type: ClusterIP
   selector:
-    {{- include "common_labels" (list $ $component_type) | nindent 4 }}
+    app: frontend
   ports:
-    - protocol: TCP
-      port: {{ .port }}
-      targetPort: {{ .port }}
-      name: http
----
-{{- end -}}
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
