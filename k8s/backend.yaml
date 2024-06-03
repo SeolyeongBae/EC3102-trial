@@ -7,6 +7,7 @@ metadata:
     app: backend
     dash.ulagbulag.io/subject: mobilex-exp
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: backend
@@ -20,7 +21,7 @@ spec:
       containers:
         - name: server
           # TODO(user): change to your image
-          image: docker.io/dohyun682/ec3102-trial-backend:0.0.5
+          image: docker.io/dohyun682/ec3102-trial-backend:0.1.1
           env:
             - name: BASE_URL
               value: /api/v1
@@ -29,6 +30,8 @@ spec:
                 secretKeyRef:
                   name: openai
                   key: OPENAI_API_KEY
+            - name: FIREBASE_CREDENTIALS_PATH
+              value: /secrets/firebase-credentials.json
           ports:
             - name: http
               protocol: TCP
@@ -37,6 +40,8 @@ spec:
             - name: huggingface-hub-token
               mountPath: /root/.cache/huggingface/token
               subPath: token
+            - name: firebase-credentials
+              mountPath: /secrets
       volumes:
         - name: huggingface-hub-token
           secret:
@@ -44,6 +49,12 @@ spec:
             items:
               - key: HUGGING_FACE_HUB_TOKEN
                 path: token
+        - name: firebase-credentials
+          secret:
+            secretName: firebase-credentials
+        - name: openai
+          secret:
+            secretName: openai
 ---
 apiVersion: v1
 kind: Service
