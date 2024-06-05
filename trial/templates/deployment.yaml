@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "trial.fullname" . }}
+  labels:
+    app: backend
+    {{- include "trial.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "trial.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "trial.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:0.1.1"
+          env:
+            - name: BASE_URL
+              value: {{ .Values.env.BASE_URL }}
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai
+                  key: OPENAI_API_KEY
+            - name: FIREBASE_CREDENTIALS_PATH
+              value: {{ .Values.env.FIREBASE_CREDENTIALS_PATH }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: huggingface-hub-token
+              mountPath: /root/.cache/huggingface/token
+              subPath: token
+            - name: firebase-credentials
+              mountPath: /secrets
+      volumes:
+        - name: huggingface-hub-token
+          secret:
+            secretName: huggingface-hub
+            items:
+              - key: HUGGING_FACE_HUB_TOKEN
+                path: token
+        - name: firebase-credentials
+          secret:
+            secretName: firebase-credentials
+        - name: openai
+          secret:
+            secretName: openai
+
