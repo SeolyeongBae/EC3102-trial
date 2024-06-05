@@ -1,29 +1,29 @@
 backend:
-  image: __PLACEHOLDER_OVERRIDE_ME__
+  image: docker.io/dohyun682/ec3102-trial-backend:0.1.1
   port: 8000
   replicas: 1
   strategy: RollingUpdate
 
 frontend:
-  image: __PLACEHOLDER_OVERRIDE_ME__
-  port: 8501
+  image: docker.io/seolyeong/ec3102-trial-fe:v0.2
+  port: 3000
   replicas: 1
   strategy: RollingUpdate
 
-database:
-  # TA Note: MySQL로 바꾸려면 여기 image와 port만 바꾼다.
-  # 차트에 MySQL용 설정값들도 미리 대응되어 있음.
-  # 학생들이 Database에 접근할 때는 Backend에 주입되는 다음 ENV를 사용하도록 가이드한다.
-  # - DATABASE_HOST
-  # - DATABASE_PORT
-  # - DATABASE_USER
-  # - DATABASE_PASSWORD
-  image: postgres:16.2
-  port: 5432
-  replicas: 1
-  strategy: Recreate
-  username: mobilex
-  dbname: mobilex
+# database:
+#   # TA Note: MySQL로 바꾸려면 여기 image와 port만 바꾼다.
+#   # 차트에 MySQL용 설정값들도 미리 대응되어 있음.
+#   # 학생들이 Database에 접근할 때는 Backend에 주입되는 다음 ENV를 사용하도록 가이드한다.
+#   # - DATABASE_HOST
+#   # - DATABASE_PORT
+#   # - DATABASE_USER
+#   # - DATABASE_PASSWORD
+#   image: postgres:16.2
+#   port: 5432
+#   replicas: 1
+#   strategy: Recreate
+#   username: mobilex
+#   dbname: mobilex
 
 nginx:
   # TA Note: Nginx은 미리 다음과 같이 설정되어 있다.

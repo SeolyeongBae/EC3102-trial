@@ -8,7 +8,8 @@ metadata:
     {{- include "common_labels" (list $ $component_type) | nindent 4 }}
 spec:
   replicas: {{ .replicas }}
-  strategy: {{ .strategy }}
+  strategy: 
+    type: {{ .strategy }}
   selector:
     matchLabels:
       {{- include "common_labels" (list $ $component_type) | nindent 6 }}
@@ -21,13 +22,6 @@ spec:
         - name: {{ $component_type }}
           image: {{ .image }}
           imagePullPolicy: Always
-          command:
-            - "streamlit"
-            - "run"
-            - "main.py"
-          env:
-            - name: STREAMLIT_SERVER_PORT
-              value: "{{ .port }}"
           ports:
             - containerPort: {{ .port }}
 ---
