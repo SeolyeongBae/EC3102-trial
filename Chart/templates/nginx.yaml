@@ -70,7 +70,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $.Release.Name }}-{{ $component_type }}
+  name: frontend
   labels:
     {{- include "common_labels" (list $ $component_type) | nindent 4 }}
 spec:
