@@ -1,4 +1,4 @@
-{{- $component_type := "frontend" }}
+{{- $component_type := "backend" }}
 {{- with (get .Values $component_type) -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -22,8 +22,37 @@ spec:
         - name: {{ $component_type }}
           image: {{ .image }}
           imagePullPolicy: Always
+          env:
+            - name: BASE_URL
+              value: /api/v1
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai
+                  key: OPENAI_API_KEY
+            - name: FIREBASE_CREDENTIALS_PATH
+              value: /secrets/firebase-credentials.json
+          volumeMounts:
+            - name: huggingface-hub-token
+              mountPath: /root/.cache/huggingface/token
+              subPath: token
+            - name: firebase-credentials
+              mountPath: /secrets
           ports:
             - containerPort: {{ .port }}
+      volumes:
+        - name: huggingface-hub-token
+          secret:
+            secretName: huggingface-hub
+            items:
+              - key: HUGGING_FACE_HUB_TOKEN
+                path: token
+        - name: firebase-credentials
+          secret:
+            secretName: firebase-credentials
+        - name: openai
+          secret:
+            secretName: openai
 ---
 apiVersion: v1
 kind: Service
