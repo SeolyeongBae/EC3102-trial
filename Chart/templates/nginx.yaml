@@ -8,25 +8,30 @@ metadata:
     {{- include "common_labels" (list $ $component_type) | nindent 4 }}
 data:
   nginx.conf: |
-    server {
-        listen 80;
-        location /api {
-          return 302 /api/;
-        }
-        location /api/ {
-            proxy_pass http://{{ $.Release.Name }}-backend:{{ $.Values.backend.port }}/;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-        location / {
-            proxy_pass http://{{ $.Release.Name }}-frontend:{{ $.Values.frontend.port }};
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
+    events {
+        worker_connections 1024;
+    }
+    http {
+      server {
+          listen 80;
+          location /api {
+            return 302 /api/;
+          }
+          location /api/ {
+              proxy_pass http://{{ $.Release.Name }}-backend:{{ $.Values.backend.port }}/;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+          }
+          location / {
+              proxy_pass http://{{ $.Release.Name }}-frontend:{{ $.Values.frontend.port }};
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+          }
+      }
     }
 ---
 apiVersion: apps/v1
@@ -37,7 +42,8 @@ metadata:
     {{- include "common_labels" (list $ $component_type) | nindent 4 }}
 spec:
   replicas: {{ .replicas }}
-  strategy: {{ .strategy }}
+  strategy:
+    type: {{ .strategy }}
   selector:
     matchLabels:
       {{- include "common_labels" (list $ $component_type) | nindent 6 }}
@@ -64,7 +70,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $.Release.Name }}-{{ $component_type }}
+  name: frontend
   labels:
     {{- include "common_labels" (list $ $component_type) | nindent 4 }}
 spec:

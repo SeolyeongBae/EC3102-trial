@@ -24,7 +24,7 @@ spec:
           image: docker.io/dohyun682/ec3102-trial-backend:0.1.1
           env:
             - name: BASE_URL
-              value: /api/v1
+              value: /api
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:

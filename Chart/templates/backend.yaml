@@ -8,7 +8,8 @@ metadata:
     {{- include "common_labels" (list $ $component_type) | nindent 4 }}
 spec:
   replicas: {{ .replicas }}
-  strategy: {{ .strategy }}
+  strategy: 
+    type: {{ .strategy }}
   selector:
     matchLabels:
       {{- include "common_labels" (list $ $component_type) | nindent 6 }}
@@ -21,34 +22,37 @@ spec:
         - name: {{ $component_type }}
           image: {{ .image }}
           imagePullPolicy: Always
-          command:
-            - "gunicorn"
-            - "-w=8"
-            - "-b=0.0.0.0:{{ .port }}"
-            - "--access-logfile=-"
-            - "main:app"
           env:
-            - name: DATABASE_USERNAME
+            - name: BASE_URL
+              value: /api
+            - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ $.Release.Name }}-database
-                  key: username
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $.Release.Name }}-database
-                  key: password
-            - name: DATABASE_DBNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $.Release.Name }}-database
-                  key: dbname
-            - name: DATABASE_HOST
-              value: {{ $.Release.Name }}-database
-            - name: DATABASE_PORT
-              value: {{ $.Values.database.port }}
+                  name: openai
+                  key: OPENAI_API_KEY
+            - name: FIREBASE_CREDENTIALS_PATH
+              value: /secrets/firebase-credentials.json
+          volumeMounts:
+            - name: huggingface-hub-token
+              mountPath: /root/.cache/huggingface/token
+              subPath: token
+            - name: firebase-credentials
+              mountPath: /secrets
           ports:
             - containerPort: {{ .port }}
+      volumes:
+        - name: huggingface-hub-token
+          secret:
+            secretName: huggingface-hub
+            items:
+              - key: HUGGING_FACE_HUB_TOKEN
+                path: token
+        - name: firebase-credentials
+          secret:
+            secretName: firebase-credentials
+        - name: openai
+          secret:
+            secretName: openai
 ---
 apiVersion: v1
 kind: Service
