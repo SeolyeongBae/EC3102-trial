@@ -1,5 +1,5 @@
 export const fetchProsecutorScript = async (trial_id: string) => {
-  const response = await fetch(`/api/v1/prosecutor/${trial_id}`, {
+  const response = await fetch(`/api/prosecutor/${trial_id}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

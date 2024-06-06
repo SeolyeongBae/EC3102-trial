@@ -27,7 +27,7 @@ function App() {
   const { data, error, refetch } = useQuery({
     queryKey: ["trialData"],
     queryFn: () =>
-      fetch("/api/v1/init", {
+      fetch("/api/init", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
