@@ -24,7 +24,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: BASE_URL
-              value: /api/v1
+              value: /api
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
