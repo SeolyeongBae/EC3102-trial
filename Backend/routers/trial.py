@@ -29,7 +29,7 @@ lawyer_json_format = f'''
 judge_json_format = f'''
     {{
         "role": "judge",
-        "text": "the speech of the judge",
+        "text": "the speech of the judge, should include the winner of the trial",
         "winner": "prosecutor | lawyer"
     }}
     '''
