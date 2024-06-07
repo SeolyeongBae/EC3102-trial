@@ -33,4 +33,4 @@ LLM을 이용해 확장 가능한 Ace Attorney 게임을 제작하였습니다.
 * __고도현__ : Backend, Infra 개발
 * __김성원__ : AI 학습, Infra 개발
 ---
-__ps.__ commit에서 Qu4ntum0111이 김성원 학생입니다.
+__ps.__ commit에서 Qu4ntum0111과 Seongwon이 동일한 김성원 학생입니다.
