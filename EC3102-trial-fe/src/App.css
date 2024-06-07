@@ -1,0 +1,64 @@
+.App {
+  text-align: center;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  background-color: #f0f0f0;
+}
+
+.life {
+  margin: 0;
+}
+
+.dialog-box {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  padding: 20px;
+  border: 2px solid #ccc;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 24px;
+  border-radius: 10px;
+}
+
+.dialog-line {
+  margin: 10px 0;
+}
+
+.검사 {
+  color: red;
+}
+
+.변호사 {
+  color: blue;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+}
+
+.controls button,
+.controls input {
+  margin: 0 10px;
+}
+
+.game-over {
+  font-size: 24px;
+  color: red;
+  margin-top: 20px;
+}
+
+.game-over button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
