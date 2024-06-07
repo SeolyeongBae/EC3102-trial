@@ -25,4 +25,4 @@
 * __고도현__ : Backend, Infra 개발
 * __김성원__ : AI 학습, Infra 개발
 ---
-__ps.__ commit 보면 
+__ps.__ commit 보면 Qu4ntum0111이 있는데 해당 학생이 김성원 학생입니다. Local git이랑 github 계정 email이 달라서 contributor로 저장되지 않은 듯 합니다.
