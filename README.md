@@ -7,6 +7,7 @@ LLM을 이용해 확장 가능한 Ace Attorney 게임을 제작하였습니다.
 
 게임의 흐름은 다음과 같습니다.
 ### Flow of our game
+![Flow of out game](https://github.com/SeolyeongBae/EC3102-trial/blob/main/game%20flow.png)
 
 ## Stack
 1. Frontend
