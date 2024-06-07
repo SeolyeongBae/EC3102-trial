@@ -13,19 +13,15 @@ import Controls from "./components/Controls";
 import DialogBox from "./components/DialogBox";
 import EvidenceList from "./components/Evidancelist";
 import LifeHearts from "./components/lifeHearts/LifeHearts";
+import NameTag from "./components/NameTag";
 import { Character } from "./const";
 import { useTrialData } from "./hooks";
-import NameTag from "./components/NameTag";
 
 const INITIAL_TEXT = "안녕하세요. 재판을 시작하겠습니다.";
 
 interface IMutationParams {
   trial_id: string;
   speech: string;
-}
-
-interface ITrialParams {
-  trial_id: string;
 }
 
 function App() {
@@ -89,6 +85,7 @@ function App() {
         if (judgeScript) {
           setDisplayedText(judgeScript.text);
         }
+        getTrialData();
       }
     },
   });
@@ -106,14 +103,28 @@ function App() {
 
   useEffect(() => {
     if (data) {
+      //초기 데이터라는 뜻
       setTrialId(data.trial_id); // trial_id 저장
-      setProsecutorLife(data.prosecutor_life);
-      setDefenseLife(data.lawyer_life);
+      getTrialData();
       setTurn(Character.PROSECUTOR);
-      refetchTrial();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  useEffect(() => {
+    if (trialData) {
+      setProsecutorLife(trialData.prosecutor_life);
+      setDefenseLife(trialData.lawyer_life);
+
+      if (trialData.prosecutor_life === 0) {
+        alert("증인은 무죄가 되었습니다");
+        setTrialId(null);
+      } else if (trialData.lawyer_life === 0) {
+        alert("증인은 유죄가 되었습니다");
+        setTrialId(null);
+      }
+    }
+  }, [trialData]);
 
   useEffect(() => {
     if (
@@ -125,14 +136,6 @@ function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, trialId]);
-
-  useEffect(() => {
-    if (prosecutorLife === 0) {
-      alert("증인은 무죄가 되었습니다");
-    } else if (defenseLife === 0) {
-      alert("증인은 유죄가 되었습니다");
-    }
-  }, [prosecutorLife, defenseLife]);
 
   const handleInput = useCallback(
     (input: string) => {
@@ -152,7 +155,15 @@ function App() {
 
   const handleOpenModal = () => {
     setShowModal(true);
+    getTrialData();
+  };
+
+  const getTrialData = () => {
     refetchTrial();
+  };
+
+  const continueTrial = () => {
+    setTurn(Character.PROSECUTOR);
   };
 
   return (
@@ -164,11 +175,19 @@ function App() {
         >
           <p>시작</p>
         </button>
+
         <button
           className={"py-2 px-8 text-lg hover:bg-[rgba(0,0,0,0.1)]"}
           onClick={() => handleOpenModal()}
         >
           <p>사건 개요</p>
+        </button>
+
+        <button
+          className={"py-2 px-8 text-lg hover:bg-[rgba(0,0,0,0.1)]"}
+          onClick={() => continueTrial()}
+        >
+          <p>이어하기</p>
         </button>
       </div>
 
@@ -193,9 +212,6 @@ function App() {
         <div className={"flex justify-center flex-col items-center"}>
           <NameTag text={"판사"} />
           <img src={Judge} alt={"Judge"} width={"40%"} />
-          <p
-            className={"text-lg bg-white p-2 rounded-lg shadow-md"}
-          >{`${turn}가 말할 차례입니다.`}</p>
         </div>
 
         <div className={"flex flex-col items-center"}>
@@ -205,18 +221,30 @@ function App() {
         </div>
       </div>
 
-      <div className={"flex flex-col w-full"}>
-        <div className={"flex flex-col gap-2"}>
-          <DialogBox
-            displayedText={
-              prosecutorMutation.isPending ? "(자료 정리 중)" : displayedText
-            }
-            speaker={turn}
-          />
-        </div>
+      {trialId ? (
+        <div className={"flex flex-col w-full"}>
+          <div className={"flex flex-col gap-2"}>
+            <p
+              className={
+                "text-lg bg-slate-800 text-white e p-2 rounded-lg shadow-md"
+              }
+            >{`${turn}가 말할 차례입니다.`}</p>
+            <DialogBox
+              displayedText={
+                prosecutorMutation.isPending ? "(자료 정리 중)" : displayedText
+              }
+              speaker={turn}
+            />
+          </div>
 
-        <Controls onInput={handleInput} currentTurn={turn} />
-      </div>
+          <Controls onInput={handleInput} currentTurn={turn} />
+        </div>
+      ) : (
+        <DialogBox
+          displayedText={"재판을 다시 시작하시려면 '시작' 버튼을 눌러주세요."}
+          speaker={turn}
+        />
+      )}
       {showModal ? (
         <>
           <div
