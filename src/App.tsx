@@ -166,8 +166,14 @@ function App() {
     setTurn(Character.PROSECUTOR);
   };
 
+  //전체 화면의 배경색을 꽉차게 하고 싶어
+
   return (
-    <div className={"flex flex-col w-full items-center px-10 bg-amber-50 pt-5"}>
+    <div
+      className={
+        "flex flex-col w-full h-screen items-center px-10 bg-amber-50 pt-5"
+      }
+    >
       <div className={"flex w-full gap-4"}>
         <button
           className={"py-2 px-8 text-lg hover:bg-[rgba(0,0,0,0.1)]"}
