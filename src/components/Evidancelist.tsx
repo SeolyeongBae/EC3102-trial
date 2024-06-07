@@ -23,7 +23,7 @@ const EvidenceList: React.FC<{ evidenceList: Evidence[] }> = ({
   evidenceList,
 }) => {
   return (
-    <div className="p-4 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
+    <div className="p-4 mx-auto rounded-xl shadow-md space-y-4 bg-slate-100">
       <h2 className="text-xl font-bold">변호사의 증거 목록</h2>
       <ul className="space-y-2 mx-2">
         {evidenceList.map((evidence, index) => (
