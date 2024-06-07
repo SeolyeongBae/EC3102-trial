@@ -71,6 +71,8 @@ def get_response(role, trial, content=None):
 
     messages = [{"role": "system", "content": f"You are a {role}. Please respond to the following conversation. Response in json format. The format is as follows: " + json_format},]
 
+    messages.append({"role": "system", "content": "Do not repeat what you have already said."})
+
     messages.append({"role": "system", "content": f"Prior knowledge - trial description: {trial["description"]}"})
 
     messages.append({"role": "system", "content": f"Prior knowledge - evidences: {trial["evidences"]}"})
