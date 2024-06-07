@@ -1,6 +1,13 @@
 # 🖋 Ace Attorney
   + Scalabe "Ace Attorney" with LLM
   + https://computer-system-team-02.dev.mobilex.kr/
+---
+LLM을 이용해 확장 가능한 Ace Attorney 게임을 제작하였습니다. 
+해당 게임에서는 검사와 판사를 ___LLM___ 으로 구성하였고, 플레이어는 변호사의 역할을 수행하게 됩니다.
+
+게임의 흐름은 다음과 같습니다.
+### Flow of our game
+
 ## Stack
 1. Frontend
    + __React__
