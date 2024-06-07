@@ -38,3 +38,16 @@ export const fetchTrialData = async (trial_id: string): Promise<any> => {
   }
   return response.json();
 };
+
+export const fetchJudgeScript = async (trial_id: string): Promise<any> => {
+  const response = await fetch(`/api/judge/${trial_id}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  return response.json();
+};

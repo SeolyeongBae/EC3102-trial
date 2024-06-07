@@ -1,7 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
-import { fetchLawyerScript, fetchProsecutorScript } from "./apis";
+import {
+  fetchJudgeScript,
+  fetchLawyerScript,
+  fetchProsecutorScript,
+} from "./apis";
 import Judge from "./assets/judge.webp";
 import Lawyer from "./assets/lawyer.webp";
 import Prosecutor from "./assets/pro.png";
@@ -11,6 +15,7 @@ import EvidenceList from "./components/Evidancelist";
 import LifeHearts from "./components/lifeHearts/LifeHearts";
 import { Character } from "./const";
 import { useTrialData } from "./hooks";
+import NameTag from "./components/NameTag";
 
 const INITIAL_TEXT = "안녕하세요. 재판을 시작하겠습니다.";
 
@@ -71,20 +76,30 @@ function App() {
     },
   });
 
-  const laywerMutation = useMutation({
+  const judgeMutation = useMutation({
+    mutationFn: (trial_id: string) => fetchJudgeScript(trial_id),
+    onSuccess: (data) => {
+      if (data.scripts && data.scripts.length > 0) {
+        //data.scripts에서 뒤에서부터 찾다가 role이 prosecutor 인거만 찾아줘
+        const judgeScript = data.scripts
+          .slice()
+          .reverse()
+          .find((script: any) => script.role === "judge");
+
+        if (judgeScript) {
+          setDisplayedText(judgeScript.text);
+        }
+      }
+    },
+  });
+
+  const lawyerMutation = useMutation({
     mutationFn: ({ trial_id, speech }: IMutationParams) =>
       fetchLawyerScript(trial_id, speech),
     onSuccess: (data) => {
       if (data.scripts && data.scripts.length > 0) {
-        // //data.scripts에서 뒤에서부터 찾다가 role이 prosecutor 인거만 찾아줘
-        // const prosecutorScript = data.scripts
-        //   .slice()
-        //   .reverse()
-        //   .find((script: any) => script.role === '');
-        // if (prosecutorScript) {
-        //   setDisplayedText(prosecutorScript.text);
-        //   setTurn(() => Character.LAWYER);
-        // }
+        setTurn(Character.JUDGE); // 턴 넘겨줌
+        judgeMutation.mutate(trialId ?? "");
       }
     },
   });
@@ -119,12 +134,15 @@ function App() {
     }
   }, [prosecutorLife, defenseLife]);
 
-  const handleInput = useCallback((input: string) => {
-    if (input.length !== 0) {
-      setFullText(input); //변호사가 한 말을 저장, 서버로 보냄
-      setTurn(Character.PROSECUTOR);
-    }
-  }, []);
+  const handleInput = useCallback(
+    (input: string) => {
+      if (input.length !== 0) {
+        setFullText(input); //변호사가 한 말을 저장, 서버로 보냄
+        lawyerMutation.mutate({ trial_id: trialId ?? "", speech: input });
+      }
+    },
+    [lawyerMutation, trialId],
+  );
 
   const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -160,14 +178,8 @@ function App() {
 
       <div className={"grid grid-cols-3 w-full"}>
         <div className={"flex flex-col items-center relative"}>
-          <p
-            className={
-              "absolute top-[-60px] text-lg bg-white p-2 rounded-lg shadow-md"
-            }
-          >
-            YOU
-          </p>
           <LifeHearts maximum={3} left={defenseLife} />
+          <NameTag text={"변호사"} />
           <img
             src={Prosecutor}
             alt={"Lawyer"}
@@ -178,12 +190,17 @@ function App() {
           />
         </div>
 
-        <div className={"flex justify-center items-start"}>
+        <div className={"flex justify-center flex-col items-center"}>
+          <NameTag text={"판사"} />
           <img src={Judge} alt={"Judge"} width={"40%"} />
+          <p
+            className={"text-lg bg-white p-2 rounded-lg shadow-md"}
+          >{`${turn}가 말할 차례입니다.`}</p>
         </div>
 
         <div className={"flex flex-col items-center"}>
           <LifeHearts maximum={3} left={prosecutorLife} />
+          <NameTag text={"검사"} />
           <img src={Lawyer} alt={"Lawyer"} width={"40%"} style={{}} />
         </div>
       </div>
@@ -194,7 +211,7 @@ function App() {
             displayedText={
               prosecutorMutation.isPending ? "(자료 정리 중)" : displayedText
             }
-            speaker={Character.PROSECUTOR}
+            speaker={turn}
           />
         </div>
 
