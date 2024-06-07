@@ -1,5 +1,5 @@
 backend:
-  image: docker.io/dohyun682/ec3102-trial-backend:0.1.3
+  image: docker.io/dohyun682/ec3102-trial-backend:0.1.4
   port: 8000
   replicas: 1
   strategy: RollingUpdate
