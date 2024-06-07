@@ -26,7 +26,7 @@ LLM을 이용해 확장 가능한 Ace Attorney 게임을 제작하였습니다.
 
 ---
 ### Infra Structure
-![Infra structure File](https://github.com/SeolyeongBae/EC3102-trial/blob/main/Infra%20Structure.png)
+![Infra structure File](https://github.com/SeolyeongBae/EC3102-trial/blob/main/Infra.png)
 
 ## Member
 * __배설영__ : ___Team leader___, Frontend 개발
