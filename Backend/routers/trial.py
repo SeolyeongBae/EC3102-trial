@@ -29,8 +29,8 @@ lawyer_json_format = f'''
 judge_json_format = f'''
     {{
         "role": "judge",
-        "text": "the speech of the judge",
-        "winner": "prosecutor | lawyer"
+        "text": "the speech of the judge, should include the winner of the trial",
+        "winner": "prosecutor | lawyer" (Use recent script information to determine whose claim is more valid. The winner is the one who is more valid.)
     }}
     '''
 
@@ -71,11 +71,15 @@ def get_response(role, trial, content=None):
 
     messages = [{"role": "system", "content": f"You are a {role}. Please respond to the following conversation. Response in json format. The format is as follows: " + json_format},]
 
+    messages.append({"role": "system", "content": "Do not repeat what you have already said."})
+
     messages.append({"role": "system", "content": f"Prior knowledge - trial description: {trial["description"]}"})
 
     messages.append({"role": "system", "content": f"Prior knowledge - evidences: {trial["evidences"]}"})
 
-    messages.append({"role": "system", "content": f"Prior knowledge - scripts: {trial['scripts']}"})
+    messages.append({"role": "system", "content": f"Prior knowledge - what prosecutor, lawyer, and judge said before. Use this as a guide to make a new argument every time: {trial['scripts']}"})
+
+    print(messages)
 
     if content:
         messages.append({"role": "user", "content": content})
@@ -133,7 +137,13 @@ def generate_lawyer(trial_id, action):
 def generate_judge(trial_id):
     trial = firebase.read_data(trial_id)
 
-    response = get_response("judge", trial)
+    
+
+    response = get_response("judge", {
+        "description": trial["description"],
+        "evidences": trial["evidences"],
+        "scripts": trial["scripts"][-2:]
+    })
 
     if response["winner"] == "prosecutor":
         trial["lawyer_life"] -= 1
